@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -30,6 +31,10 @@ public interface CustomerService {
     @Path("/findCustomersAssociated2FixedArea")
     public List<Customer> findCustomersAssociated2FixedArea(@QueryParam("fixedAreaId") String fixedAreaId);
 
-
+ 
+    @PUT
+    @Path("/assignCustomers2FixedArea")
+    public void assignCustomers2FixedArea(@QueryParam("fixedAreaId") String fixedAreaId,
+            @QueryParam("customerIds") Long[] customerIds);
 }
   

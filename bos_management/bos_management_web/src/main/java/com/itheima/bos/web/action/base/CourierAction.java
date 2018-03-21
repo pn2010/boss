@@ -30,51 +30,35 @@ import org.springframework.stereotype.Controller;
 import com.itheima.bos.domain.base.Courier;
 import com.itheima.bos.domain.base.Standard;
 import com.itheima.bos.service.base.CourierService;
+import com.itheima.bos.web.action.CommonAction;
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 
 import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
 
-/**
- * ClassName:CourierAction <br/>
- * Function: <br/>
- * Date: 2018年3月14日 上午11:37:22 <br/>
- */
 @Namespace("/")
 @ParentPackage("struts-default")
 @Controller
 @Scope("prototype")
-public class CourierAction extends ActionSupport
-        implements ModelDriven<Courier> {
+public class CourierAction extends CommonAction<Courier> {
 
-    private Courier model = new Courier();
-
-    @Override
-    public Courier getModel() {
-        return model;
+    public CourierAction() {
+          
+        super(Courier.class);  
     }
+
+   
 
     @Autowired
     private CourierService courierService;
 
-    @Action(value = "courierAction_save", results = {@Result(name = "success",
-            location = "/pages/base/courier.html", type = "redirect")})
+    @Action(value = "courierAction_save", results = {
+            @Result(name = "success", location = "/pages/base/courier.html", type = "redirect")})
     public String save() {
 
-        courierService.save(model);
+        courierService.save(getModel());
         return SUCCESS;
-    }
-
-    private int page;
-    private int rows;
-
-    public void setPage(int page) {
-        this.page = page;
-    }
-
-    public void setRows(int rows) {
-        this.rows = rows;
     }
 
     @Action("courierAction_pageQuery")
@@ -89,38 +73,35 @@ public class CourierAction extends ActionSupport
              * @return a {@link Predicate}, must not be {@literal null}.
              */
             @Override
-            public Predicate toPredicate(Root<Courier> root,
-                    CriteriaQuery<?> query, CriteriaBuilder cb) {
+            public Predicate toPredicate(Root<Courier> root, CriteriaQuery<?> query,
+                    CriteriaBuilder cb) {
 
-                String courierNum = model.getCourierNum();
-                String company = model.getCompany();
-                String type = model.getType();
-                Standard standard = model.getStandard();
+                String courierNum = getModel().getCourierNum();
+                String company = getModel().getCompany();
+                String type = getModel().getType();
+                Standard standard = getModel().getStandard();
                 // 存储条件的集合
                 List<Predicate> list = new ArrayList<>();
                 if (StringUtils.isNotEmpty(courierNum)) {
                     // 如果工号不为空,构建一个等值查询条件
                     // where courierNum = "001"
                     // 参数二 : 具体的要比较的值
-                    Predicate p1 =
-                            cb.equal(root.get("courierNum").as(String.class),
-                                    courierNum);
+                    Predicate p1 = cb.equal(root.get("courierNum").as(String.class), courierNum);
                     list.add(p1);
                 }
                 if (StringUtils.isNotEmpty(company)) {
                     // 如果公司不为空,构建一个模糊查询条件
                     // where company like "001"
                     // 参数二 : 具体的要比较的值
-                    Predicate p2 = cb.like(root.get("company").as(String.class),
-                            "%" + company + "%");
+                    Predicate p2 =
+                            cb.like(root.get("company").as(String.class), "%" + company + "%");
                     list.add(p2);
                 }
                 if (StringUtils.isNotEmpty(type)) {
                     // 如果类型不为空,构建一个等值查询条件
                     // where courierNum = "001"
                     // 参数二 : 具体的要比较的值
-                    Predicate p3 =
-                            cb.equal(root.get("type").as(String.class), type);
+                    Predicate p3 = cb.equal(root.get("type").as(String.class), type);
                     list.add(p3);
                 }
 
@@ -129,8 +110,7 @@ public class CourierAction extends ActionSupport
                     if (StringUtils.isNotEmpty(name)) {
                         // 连表查询,查询标准的名字
                         Join<Object, Object> join = root.join("standard");
-                        Predicate p4 = cb
-                                .equal(join.get("name").as(String.class), name);
+                        Predicate p4 = cb.equal(join.get("name").as(String.class), name);
                         list.add(p4);
                     }
                 }
@@ -154,24 +134,9 @@ public class CourierAction extends ActionSupport
 
         Page<Courier> page = courierService.findAll(specification, pageable);
 
-        long total = page.getTotalElements();
-        List<Courier> content = page.getContent();
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("total", total);
-        map.put("rows", content);
-
-        // 灵活控制输出的内容
         JsonConfig jsonConfig = new JsonConfig();
         jsonConfig.setExcludes(new String[] {"fixedAreas", "takeTime"});
-
-        String json = JSONObject.fromObject(map, jsonConfig).toString();
-
-        // 在实际开发的时候,为了提高服务器的性能,把前台页面不需要的数据都应该忽略掉
-        HttpServletResponse response = ServletActionContext.getResponse();
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(json);
-
+        page2json(page, jsonConfig);
         return NONE;
     }
 
@@ -183,12 +148,21 @@ public class CourierAction extends ActionSupport
     }
 
     // 批量删除
-    @Action(value = "courierAction_batchDel",
-            results = {@Result(name = "success",
-                    location = "/pages/base/courier.html", type = "redirect")})
+    @Action(value = "courierAction_batchDel", results = {
+            @Result(name = "success", location = "/pages/base/courier.html", type = "redirect")})
     public String batchDel() {
         courierService.batchDel(ids);
         return SUCCESS;
     }
 
+    // 查询在职的快递员
+    @Action(value = "courierAction_findAvalible")
+    public String findAvalible() throws IOException {
+        List<Courier> list = courierService.findAvalible();
+        JsonConfig jsonConfig = new JsonConfig();
+        jsonConfig.setExcludes(new String[] {"fixedAreas", "takeTime"});
+        list2json(list, jsonConfig);
+        
+        return NONE;
+    }
 }

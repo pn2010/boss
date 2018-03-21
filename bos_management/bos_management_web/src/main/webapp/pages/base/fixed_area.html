@@ -124,6 +124,18 @@
 				text : '关联快递员',
 				iconCls : 'icon-sum',
 				handler : function() {
+					// 判断是否已经选中了一个定区，弹出关联快递员窗口 
+					var rows = $("#grid").datagrid('getSelections');
+					if(rows.length==1){
+						
+						$("#courierWindow").window('open')
+					}else{
+						
+						
+						$.messager.alert( "警告","关联快递员,只能（必须）选择一个定区", "warning")
+					}
+					
+					
 				}
 				
 			}, {
@@ -431,7 +443,7 @@
 		style="top: 20px; left: 200px; width: 400px; height: 300px;">
 		<div style="overflow: auto; padding: 5px;" border="false">
 			<form id="customerForm"
-				action="../../fixedAreaAction_findCustomersAssociated2FixedArea.action"
+				action="../../fixedAreaAction_assignCustomers2FixedArea.action"
 				method="post">
 				<table class="table-edit" width="80%" align="center">
 					<tr class="title">
@@ -444,13 +456,13 @@
 							
 							</select>
 						</td>
-						<td><input type="button" value="》》" id="toRight"> <br />
-							<input type="button" value="《《" id="toLeft"></td>
+						<td><input type="button" value="》》" id="toRight" onclick="move2right()"> <br />
+							<input type="button" value="《《" id="toLeft" onclick="move2left()"></td>
 						<td><select id="associationSelect" name="customerIds"
 							multiple="multiple" size="10"></select></td>
 					</tr>
 					<tr>
-						<td colspan="3"><a id="associationBtn" href="#"
+						<td colspan="3"><a id="associationBtn" href="#" onclick="submitAssociationCustomer()"
 							class="easyui-linkbutton" data-options="iconCls:'icon-save'">关联客户</a>
 						</td>
 					</tr>
@@ -458,7 +470,31 @@
 			</form>
 		</div>
 	</div>
+<script type="text/javascript">
+function move2right(){
+	$("#associationSelect").append($("#noassociationSelect option:selected"))
+	
+}
+function move2left(){
+	
+	$("#noassociationSelect").append($("#associationSelect option:selected"))
+	
+}
 
+function submitAssociationCustomer(){
+	//为定区id赋值
+var rows=$("#grid").datagrid("getSelections")
+$("#customerFixedAreaId").val(rows[0].id)
+
+//选中右侧下拉框中所有的option
+$("#associationSelect option").attr("selected","selected")
+
+$("#customerForm").submit()
+
+	
+}
+
+</script>
 	<!-- 关联快递员窗口 -->
 	<div class="easyui-window" title="关联快递员窗口" id="courierWindow"
 		modal="true" collapsible="false" closed="true" minimizable="false"
@@ -477,23 +513,21 @@
 						<td>
 							<!-- 存放定区编号 --> <input type="hidden" name="id"
 							id="courierFixedAreaId" /> <input
-							data-options="ditable:false, url:'../../courierAction_listajax.action',valueField:'id',textField:'name'"
+							data-options="ditable:false, url:'../../courierAction_findAvalible.action',valueField:'id',textField:'name'"
 							type="text" name="courierId" class="easyui-combobox"
 							required="true" />
 						</td>
 					</tr>
 					<tr>
 						<td>选择收派时间</td>
-						<td><select required="true" class="easyui-combobox"
-							name="takeTimeId">
-								<option>请选择</option>
-								<option value="1">北京早班</option>
-								<option value="2">北京晚班</option>
-						</select> <!-- <input type="text" name="takeTimeId" class="easyui-combobox" required="true" /> -->
+						<td><input
+							data-options="ditable:false, url:'../../takeTime_findAll.action',valueField:'id',textField:'name'"
+							type="text" name="takeTimeId" class="easyui-combobox"
+							required="true" />
 						</td>
 					</tr>
 					<tr>
-						<td colspan="3"><a id="associationCourierBtn" href="#"
+						<td colspan="3"><a id="associationCourierBtn" href="#" onclick="submitCourierData()"
 							class="easyui-linkbutton" data-options="iconCls:'icon-save'">关联快递员</a>
 						</td>
 					</tr>
@@ -501,6 +535,21 @@
 			</form>
 		</div>
 	</div>
+	
+	<script type="text/javascript">
+function submitCourierData(){
+	//获取当前选中的是哪个定区
+var rows=$("#grid").datagrid('getSelections')
+//为隐藏域中的id赋值
+$("#courierFixedAreaId").val(rows[0].id)
+//提交表单
+$("#courierForm").submit()
+	
+	
+}
+	
+	
+	</script>
 </body>
 
 </html>

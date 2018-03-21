@@ -7,6 +7,7 @@ import java.util.List;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.cxf.jaxrs.client.WebClient;
+import org.apache.cxf.jaxrs.provider.PrimitiveTextProvider;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -83,5 +84,41 @@ public class FixedAreaAction extends CommonAction<FixedArea> {
 
         return NONE;
     }
+    
+    //使用属性驱动获取被选中的客户的id
+    private Long[] customerIds;
+    
+    public void setCustomerIds(Long[] customerIds) {
+        this.customerIds = customerIds;
+    }
+    
+    
+    
+    @Action(value="fixedAreaAction_assignCustomers2FixedArea",
+            results={@Result(name="success",location="/pages/base/fixed_area.html",type="redirect")})
+    public String assignCustomers2FixedArea(){
+        WebClient.create("http://localhost:8180/crm/webService/customerService/assignCustomers2FixedArea").accept(MediaType.APPLICATION_JSON)
+        .type(MediaType.APPLICATION_JSON).query("fixedAreaId", getModel().getId())
+        .query("customerIds", customerIds)
+        .put(null);
+        
+        return SUCCESS;
+    }
 
+    private Long courierId;
+    private Long takeTimeId;
+    public void setCourierId(Long courierId) {
+        this.courierId = courierId;
+    }
+    public void setTakeTimeId(Long takeTimeId) {
+        this.takeTimeId = takeTimeId;
+    }
+    
+    
+    @Action(value="fixedAreaAction_associationCourierToFixedArea",results={@Result(name="success",location="pages/base/fixed_area.html",type="redirect")})
+    public String  associationCourierToFixedArea(){
+        
+       fixedAreaService.associationCourierToFixedArea(getModel().getId(),courierId,takeTimeId);
+        return SUCCESS;
+    }
 }
