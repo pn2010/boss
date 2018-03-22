@@ -1,6 +1,7 @@
 package com.itheima.bos.web.action.base;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
@@ -49,11 +50,32 @@ public class SubAreaAction extends CommonAction<SubArea> {
     public String pageQuery() throws IOException {
         Pageable pageable = new PageRequest(page - 1, rows);
         Page<SubArea> page = subAreaService.findAll(pageable);
-        
+
         JsonConfig jsonConfig = new JsonConfig();
         jsonConfig.setExcludes(new String[] {"subareas", "couriers"});
         page2json(page, jsonConfig);
+
+        return NONE;
+    }
+
+    @Action(value = "subAreaAction_findSubAreaUnAssociated")
+    public String findSubAreaUnAssociated() throws IOException {
+
+        List<SubArea> list = subAreaService.findSubAreaUnAssociated();
+        //System.out.println(list);
+        JsonConfig jsonConfig = new JsonConfig();
+        jsonConfig.setExcludes(new String[] {"subareas","couriers"});
+        list2json(list, jsonConfig);
         
+        return NONE;
+    }
+
+    @Action(value = "subAreaAction_findSubAreaAssociated2FixedArea")
+    public String findSubAreaAssociated2FixedArea() throws IOException {
+        List<SubArea> list = subAreaService.findSubAreaAssociated2FixedArea(getModel().getId());
+        JsonConfig jsonConfig = new JsonConfig();
+        jsonConfig.setExcludes(new String[] {"subareas","couriers"});
+        list2json(list, jsonConfig);
         return NONE;
     }
 }

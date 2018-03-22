@@ -21,7 +21,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 
 import com.itheima.bos.domain.base.FixedArea;
+import com.itheima.bos.domain.base.SubArea;
 import com.itheima.bos.service.base.FixedAreaService;
+import com.itheima.bos.service.base.SubAreaService;
 import com.itheima.bos.web.action.CommonAction;
 import com.itheima.crm.domain.Customer;
 
@@ -121,4 +123,18 @@ public class FixedAreaAction extends CommonAction<FixedArea> {
        fixedAreaService.associationCourierToFixedArea(getModel().getId(),courierId,takeTimeId);
         return SUCCESS;
     }
+    
+    private Long[] subAreaIds;
+    public void setSubAreaIds(Long[] subAreaIds) {
+        this.subAreaIds = subAreaIds;
+    }
+    
+    @Action(value="fixedAreaAction_assignSubArea2FixedArea", results={@Result(name="success",location="/pages/base/fixed_area.html",type="redirect")}) 
+    public String assignSubArea2FixedArea(){
+        
+        fixedAreaService.assignSubArea2FixedArea(getModel().getId(),subAreaIds);
+        
+        return SUCCESS;
+    }
+   
 }
