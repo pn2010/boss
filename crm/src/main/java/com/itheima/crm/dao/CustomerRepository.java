@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.itheima.crm.domain.Customer;
 
+import groovy.time.BaseDuration.From;
+
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     List<Customer> findByFixedAreaIdIsNull();
@@ -27,6 +29,11 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     Customer findByTelephone(String telephone);
 
     Customer findByTelephoneAndPassword(String telephone, String password);
+//根据地址查询定区id
+    @Query("select fixedAreaId from Customer where address=?")
+    String findFixedAreaIdByAddress(String address);
+
+    
     
   
 
