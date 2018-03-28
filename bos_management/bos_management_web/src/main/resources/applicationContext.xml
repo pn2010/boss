@@ -67,12 +67,22 @@
 	<context:component-scan base-package="com.itheima.bos.service,com.itheima.bos.web" />
 
 	<!-- 开启事务注解 -->
-	<tx:annotation-driven transaction-manager="transactionManager" />
-	<!--
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+	<!--基于spring自动代理的方式，为service层的对象创建代理对象
 		#########################################################
 		指定Spring Data JPA要进行扫描的包,该包中的类框架会自动为其创建代理
 		#########################################################
 	-->
+	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
+	<property name="proxyTargetClass" value="true"></property>
+	</bean>
+	
+	<!-- 配置切面=切点+通知 切点：向哪里插入代码  通知：要插入的代码 -->
+	
+	<bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+	<property name="securityManager" ref="securityManager"></property>
+	</bean>
+	
 	<jpa:repositories base-package="com.itheima.bos.dao" />
 
 	<!--发布订单的WebService -->
@@ -87,4 +97,45 @@
 			<bean class="org.apache.cxf.interceptor.LoggingOutInterceptor"></bean>
 		</jaxrs:outInterceptors>
 	</jaxrs:server>
+	
+	<!--工厂bean，初始化shiro框架提供的filter  -->
+	
+	<bean id="shiroFilterFactoryBean" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+	<property name="securityManager" ref="securityManager"></property>
+	<!--登录页面的url，认证的页面  -->
+	<property name="loginUrl" value="/login.html"></property>
+	<!--认证以后跳转的页面  -->
+	<property name="successUrl" value="/index.html"></property>
+	<!--权限不足时候，跳转的页面  这个权限不足的页面生效 不对注解生效 -->
+	<property name="unauthorizedUrl" value="/unauthorizedUrl.html"></property>
+	
+	
+	<!--指定拦截规则  -->
+	<property name="filterChainDefinitions">
+	<!--authc:框架提供的一个拦截器，必须认证通过，认证通过就可以访问
+	认证失败，无法访问
+	anon：框架提供的一个拦截器，可以匿名访问
+	拦截器执行的时候是从上往下执行的，一旦有一个匹配成功执行了，后面的规则不在会
+	被执行
+	
+	  -->
+	     <value>
+	     /userAction_login.action =anon
+	     /css/*=anon
+	     /data/*=anon
+	     /images/*=anon
+	     /js/**=anon
+	     /validatecode.jsp*=anon
+	     /hi.html=perms["courier_pageQuery"]
+	     /**=authc
+	     </value>
+	</property>
+	</bean>
+	
+	<!-- 注册安全管理器 -->
+	<bean id="securityManager" class=" org.apache.shiro.web.mgt.DefaultWebSecurityManager ">
+	  <!--注入realm  -->
+	   <property name="realm" ref="userRealm"></property>
+	
+	</bean>
 </beans>

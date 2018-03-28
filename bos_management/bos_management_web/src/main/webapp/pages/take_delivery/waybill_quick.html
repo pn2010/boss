@@ -50,12 +50,31 @@
 			var toolbar = [ {
 				id : 'button-add',	
 				text : '新增一行',
-				iconCls : 'icon-edit',
+				iconCls : 'icon-add',
 				handler : doAdd
 			}, {
-				id : 'button-cancel',
+				id : 'button-edit',
+				text : '修改',
+				iconCls : 'icon-edit',
+				handler : function(){
+				var rows=$("#grid").datagrid("getSelections")
+				   if (rows.length==1) {
+					index=$("#grid").datagrid('getRowIndex',rows[0])
+					alter(index)
+				}
+				
+				}
+			}, {
+				id : 'button-delete',
+				text : '删除',
+				iconCls : 'icon-remove',
+				handler : function(){
+					
+				}
+			}, {
+				id : 'button-help',
 				text : '取消编辑',
-				iconCls : 'icon-cancel',
+				iconCls : 'icon-help',
 				handler : doCancel
 			}, {
 				id : 'button-save',
@@ -153,6 +172,15 @@
 					onAfterEdit : function(rowIndex, rowData, changes){
 						console.info(rowData);
 						editIndex = undefined;
+						
+						$.post("../../waybillAction_save.action",rowData,function(data){
+							if (data=='0') {
+								$.messager.alert("提示", "数据录入失败,请检查数据",
+										"warning")
+							}
+							
+							
+						})
 					}
 				});
 			});

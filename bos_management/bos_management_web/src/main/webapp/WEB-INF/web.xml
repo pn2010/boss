@@ -12,7 +12,7 @@
 		<welcome-file>default.htm</welcome-file>
 		<welcome-file>default.jsp</welcome-file>
 	</welcome-file-list>
-	
+
 	<servlet>
 		<servlet-name>cxf</servlet-name>
 		<servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
@@ -23,8 +23,8 @@
 		<url-pattern>/webService/*</url-pattern>
 
 	</servlet-mapping>
-	
-	
+
+
 	<!-- 指定Spring框架配置文件的位置 -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
@@ -34,6 +34,24 @@
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
+	<!--spring提供的，用于整合shiro框架的
+		一定要写在struts框架的前端控制器之前，本fileter创建的时候。一定要
+		注入一个对象，这个对象必须声明在applicationContext.XML中
+		对象的id必须和本filter的name保持一致
+
+	-->
+
+
+	<filter>
+		<filter-name>shiroFilterFactoryBean</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+
+	</filter>
+	<filter-mapping>
+		<filter-name>shiroFilterFactoryBean</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
 	<!-- 配置Struts的前端控制器 -->
 	<filter>
 		<filter-name>struts</filter-name>
@@ -44,5 +62,5 @@
 		<url-pattern>*.action</url-pattern>
 	</filter-mapping>
 
-	
+
 </web-app>

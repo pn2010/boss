@@ -14,6 +14,7 @@ import javax.persistence.criteria.Root;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
@@ -148,6 +149,7 @@ public class CourierAction extends CommonAction<Courier> {
     }
 
     // 批量删除
+    
     @Action(value = "courierAction_batchDel", results = {
             @Result(name = "success", location = "/pages/base/courier.html", type = "redirect")})
     public String batchDel() {
